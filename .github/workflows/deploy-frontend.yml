@@ -46,7 +46,7 @@ jobs:
         run: |
           docker buildx create --name builder --use
           docker buildx inspect builder --bootstrap
-          docker buildx build -t ideavn/urdraw-fe:${{ github.run_number }} --push ./frontend/excalidraw/.
+          docker buildx build -t ideavn/urdraw-fe:${{ github.run_number }} --push ./frontend/.
 
   deploy:
     needs: build
