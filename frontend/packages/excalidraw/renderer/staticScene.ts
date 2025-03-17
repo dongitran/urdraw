@@ -18,7 +18,7 @@ import {
   getTargetFrame,
   shouldApplyFrameClip,
 } from "../frame";
-import { renderElement } from "../renderer/renderElement";
+import { renderElement } from "./renderElement";
 import { throttleRAF } from "../utils";
 
 import { bootstrapCanvas, getNormalizedCanvasDimensions } from "./helpers";

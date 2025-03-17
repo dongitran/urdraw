@@ -18,7 +18,7 @@ import { KEYS } from "../keys";
 import { reseed } from "../random";
 import * as InteractiveCanvas from "../renderer/interactiveScene";
 import * as StaticScene from "../renderer/staticScene";
-import { API } from "../tests/helpers/api";
+import { API } from "./helpers/api";
 import { arrayToMap } from "../utils";
 
 import { Keyboard, Pointer, UI } from "./helpers/ui";

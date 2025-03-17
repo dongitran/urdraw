@@ -3,15 +3,15 @@ import React from "react";
 import { copiedStyles } from "../actions/actionStyles";
 import { Excalidraw } from "../index";
 import { CODES } from "../keys";
-import { API } from "../tests/helpers/api";
-import { Keyboard, Pointer, UI } from "../tests/helpers/ui";
+import { API } from "./helpers/api";
+import { Keyboard, Pointer, UI } from "./helpers/ui";
 import {
   act,
   fireEvent,
   render,
   screen,
   togglePopover,
-} from "../tests/test-utils";
+} from "./test-utils";
 
 const { h } = window;
 
@@ -25,7 +25,7 @@ describe("actionStyles", () => {
   afterEach(async () => {
     // https://github.com/floating-ui/floating-ui/issues/1908#issuecomment-1301553793
     // affects node v16+
-    await act(async () => {});
+    await act(async () => { });
   });
 
   it("should copy & paste styles via keyboard", async () => {

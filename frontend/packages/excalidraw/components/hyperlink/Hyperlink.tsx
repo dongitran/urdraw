@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { trackEvent } from "../../analytics";
-import { getTooltipDiv, updateTooltipPosition } from "../../components/Tooltip";
+import { getTooltipDiv, updateTooltipPosition } from "../Tooltip";
 import { EVENT, HYPERLINK_TOOLTIP_DELAY } from "../../constants";
 import { isLocalLink, normalizeLink } from "../../data/url";
 import { getElementAbsoluteCoords } from "../../element/bounds";
@@ -133,19 +133,19 @@ export const Hyperlink = ({
         mutateElement(element, {
           ...(hasLinkChanged
             ? {
-                width:
-                  embedLink?.type === "video"
-                    ? width > height
-                      ? width
-                      : height * ar
-                    : width,
-                height:
-                  embedLink?.type === "video"
-                    ? width > height
-                      ? width / ar
-                      : height
-                    : height,
-              }
+              width:
+                embedLink?.type === "video"
+                  ? width > height
+                    ? width
+                    : height * ar
+                  : width,
+              height:
+                embedLink?.type === "video"
+                  ? width > height
+                    ? width / ar
+                    : height
+                  : height,
+            }
             : {}),
           link,
         });
@@ -363,8 +363,8 @@ export const getContextMenuLabel = (
   const label = isEmbeddableElement(selectedElements[0])
     ? "labels.link.editEmbed"
     : selectedElements[0]?.link
-    ? "labels.link.edit"
-    : "labels.link.create";
+      ? "labels.link.edit"
+      : "labels.link.create";
   return label;
 };
 

@@ -4,7 +4,7 @@ import { vi } from "vitest";
 import { Excalidraw } from "../index";
 import { reseed } from "../random";
 import * as StaticScene from "../renderer/staticScene";
-import { render, queryByTestId, unmountComponent } from "../tests/test-utils";
+import { render, queryByTestId, unmountComponent } from "./test-utils";
 
 const renderStaticScene = vi.spyOn(StaticScene, "renderStaticScene");
 

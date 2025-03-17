@@ -5,9 +5,9 @@ import { mutateElement } from "../element/mutateElement";
 import { t } from "../i18n";
 import { Excalidraw } from "../index";
 import { KEYS } from "../keys";
-import { API } from "../tests/helpers/api";
-import { Keyboard, Pointer, UI } from "../tests/helpers/ui";
-import { render, unmountComponent } from "../tests/test-utils";
+import { API } from "./helpers/api";
+import { Keyboard, Pointer, UI } from "./helpers/ui";
+import { render, unmountComponent } from "./test-utils";
 
 unmountComponent();
 

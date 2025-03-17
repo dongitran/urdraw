@@ -41,9 +41,9 @@ import {
   getElementsInGroup,
   selectGroupsFromGivenElements,
 } from "../groups";
-import { renderSelectionElement } from "../renderer/renderElement";
-import { renderSnaps } from "../renderer/renderSnaps";
-import { roundRect } from "../renderer/roundRect";
+import { renderSelectionElement } from "./renderElement";
+import { renderSnaps } from "./renderSnaps";
+import { roundRect } from "./roundRect";
 import {
   getScrollBars,
   SCROLLBAR_COLOR,
