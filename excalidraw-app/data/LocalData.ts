@@ -69,23 +69,21 @@ const saveDataStateToLocalStorage = (
   elements: readonly ExcalidrawElement[],
   appState: AppState,
 ) => {
+  const search = window.location?.search;
+  let id = "";
+  //if (search.startsWith("?link=")) {
+  if (search.includes("&drawId=")) {
+    id = search.split("&drawId=")[1].trim();
+  }
+
   try {
-    const _appState = clearAppStateForLocalStorage(appState);
-
-    if (
-      _appState.openSidebar?.name === DEFAULT_SIDEBAR.name &&
-      _appState.openSidebar.tab === CANVAS_SEARCH_TAB
-    ) {
-      _appState.openSidebar = null;
-    }
-
     localStorage.setItem(
-      STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS,
+      STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS + id,
       JSON.stringify(clearElementsForLocalStorage(elements)),
     );
     localStorage.setItem(
-      STORAGE_KEYS.LOCAL_STORAGE_APP_STATE,
-      JSON.stringify(_appState),
+      STORAGE_KEYS.LOCAL_STORAGE_APP_STATE + id,
+      JSON.stringify(clearAppStateForLocalStorage(appState)),
     );
     updateBrowserStateVersion(STORAGE_KEYS.VERSION_DATA_STATE);
   } catch (error: any) {

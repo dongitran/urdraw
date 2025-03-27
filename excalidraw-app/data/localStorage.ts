@@ -38,10 +38,22 @@ export const importUsernameFromLocalStorage = (): string | null => {
 export const importFromLocalStorage = () => {
   let savedElements = null;
   let savedState = null;
+  const search = window.location?.search;
+  let id = "";
+  /**if (search.startsWith("?link=")) {
+    id = search.substring(6);
+  } */
+  if (search.includes("&drawId=")) {
+    id = search.split("&drawId=")[1].trim();
+  }
 
   try {
-    savedElements = localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS);
-    savedState = localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_APP_STATE);
+    savedElements = localStorage.getItem(
+      STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS + id,
+    );
+    savedState = localStorage.getItem(
+      STORAGE_KEYS.LOCAL_STORAGE_APP_STATE + id,
+    );
   } catch (error: any) {
     // Unable to access localStorage
     console.error(error);
@@ -75,8 +87,18 @@ export const importFromLocalStorage = () => {
 };
 
 export const getElementsStorageSize = () => {
+  const search = window.location?.search;
+  let id = "";
+  /**if (search.startsWith("?link=")) {
+    id = search.substring(6);
+  } */
+  if (search.includes("&drawId=")) {
+    id = search.split("&drawId=")[1].trim();
+  }
   try {
-    const elements = localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS);
+    const elements = localStorage.getItem(
+      STORAGE_KEYS.LOCAL_STORAGE_ELEMENTS + id,
+    );
     const elementsSize = elements?.length || 0;
     return elementsSize;
   } catch (error: any) {

@@ -138,6 +138,8 @@ import { ExcalidrawPlusIframeExport } from "./ExcalidrawPlusIframeExport";
 import "./index.scss";
 
 import type { CollabAPI } from "./collab/Collab";
+import { arrayToObjectOrdered, objectToArrayOrdered } from "./convert-elements";
+import { cloneDeep, get, isEqual, omit } from "lodash";
 
 polyfill();
 
@@ -226,6 +228,8 @@ const initializeScene = async (opts: {
 
   let roomLinkData = getCollaborationLinkData(window.location.href);
   const isExternalScene = !!(id || jsonBackendMatch || roomLinkData);
+
+  const search = window.location?.search;
   if (isExternalScene) {
     if (
       // don't prompt if scene is empty
@@ -286,6 +290,28 @@ const initializeScene = async (opts: {
         isExternalScene,
       };
     }
+    // } else if (search.startsWith("?link=")) {
+  } else if (search.includes("&drawId=")) {
+    const data = search.split("&drawId=");
+    const drawId = data[1].trim();
+    const token = data[0].split("token=")[1].trim();
+    const response = await fetch(
+      `${import.meta.env.VITE_URDRAW_API}/drawing/${drawId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const content = JSON.parse((await response?.json())?.content);
+    const elementsSave = content.scene.elements.map((item: any) =>
+      arrayToObjectOrdered(item),
+    );
+    content.scene.elements = elementsSave;
+    return content as any;
   }
 
   if (roomLinkData && opts.collabAPI) {
@@ -341,6 +367,10 @@ const ExcalidrawWrapper = () => {
   const { editorTheme, appTheme, setAppTheme } = useHandleAppTheme();
 
   const [langCode, setLangCode] = useAppLangCode();
+
+  const [dataBefore, setDataBefore] = useState<any>({});
+  const [timeSync, setTimeSync] = useState(0);
+  const [sync, setSync] = useState(false);
 
   // initial state
   // ---------------------------------------------------------------------------
@@ -472,6 +502,8 @@ const ExcalidrawWrapper = () => {
     initializeScene({ collabAPI, excalidrawAPI }).then(async (data) => {
       loadImages(data, /* isInitialLoad */ true);
       initialStatePromiseRef.current.promise.resolve(data.scene);
+      setDataBefore(data);
+      setTimeSync(new Date().getTime());
     });
 
     const onHashChange = async (event: HashChangeEvent) => {
@@ -617,7 +649,60 @@ const ExcalidrawWrapper = () => {
     };
   }, [excalidrawAPI]);
 
-  const onChange = (
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const search = window.location?.search;
+      //const isExistLink = search?.startsWith("?link=");
+      const isExistLink = search.includes("&drawId=");
+      if (isExistLink && sync) {
+        console.log("sync...");
+        const data = search.split("&drawId=");
+        const drawId = data[1].trim();
+        const token = data[0].split("token=")[1].trim();
+        const elements = dataBefore?.scene?.elements;
+        const elementsConvert = elements
+          .filter((item: any) => !item?.isDeleted)
+          .map((item: any) => objectToArrayOrdered(item));
+        const appState = dataBefore?.scene?.appState;
+        fetch(`${import.meta.env.VITE_URDRAW_API}/drawing/${drawId}`, {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({
+            content: JSON.stringify({
+              scene: {
+                elements: elementsConvert,
+                appState: {
+                  ...omit(appState, ["collaborators"]),
+                  openDialog: null,
+                },
+                files: {},
+              },
+              isExternalScene: false,
+            }),
+          }),
+        })
+          .then((result) => {
+            console.log(result, "Update sucessful");
+          })
+          .catch((error) => {
+            console.log(error, "Update error");
+          })
+          .finally(() => {
+            setSync(false);
+          });
+      }
+    }, 1000);
+
+    // Cleanup function to clear the interval
+    return () => clearInterval(intervalId);
+  }, [sync, dataBefore]);
+
+  const onChange = async (
     elements: readonly OrderedExcalidrawElement[],
     appState: AppState,
     files: BinaryFiles,
@@ -626,6 +711,20 @@ const ExcalidrawWrapper = () => {
       collabAPI.syncElements(elements);
     }
 
+    const elementsOfDataBefore = get(dataBefore, "scene.elements");
+
+    const search = window.location?.search;
+    //const isExistLink = search?.startsWith("?link=");
+    const now = new Date().getTime();
+    if (!isEqual(elements, elementsOfDataBefore)) {
+      setTimeSync(now);
+
+      setDataBefore({
+        ...dataBefore,
+        scene: { ...dataBefore?.scene, elements: [...cloneDeep(elements)] },
+      } as any);
+      setSync(true);
+    }
     // this check is redundant, but since this is a hot path, it's best
     // not to evaludate the nested expression every time
     if (!LocalData.isSavePaused()) {
@@ -753,7 +852,7 @@ const ExcalidrawWrapper = () => {
   }
 
   const ExcalidrawPlusCommand = {
-    label: "Excalidraw+",
+    label: "UrDraw+",
     category: DEFAULT_CATEGORIES.links,
     predicate: true,
     icon: <div style={{ width: 14 }}>{ExcalLogo}</div>,

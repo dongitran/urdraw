@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: urdraw-content-frontend
+  namespace: urdraw
+  labels:
+    app: urdraw-content-frontend
+spec:
+  serviceName: urdraw-content-frontend
+  replicas: 4
+  selector:
+    matchLabels:
+      app: urdraw-content-frontend
+  template:
+    metadata:
+      labels:
+        app: urdraw-content-frontend
+    spec:
+      containers:
+        - name: urdraw-content-frontend
+          image: ideavn/urdraw-content-frontend:v{latest}
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 64m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urdraw-content-frontend-service
+  namespace: urdraw
+spec:
+  selector:
+    app: urdraw-content-frontend
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: urdraw-content-frontend-ingress
+  namespace: urdraw
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: p.urdraw.click
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: urdraw-content-frontend-service
+            port:
+              number: 80
